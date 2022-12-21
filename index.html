@@ -1,0 +1,691 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Austin's Cool Synth</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&display=swap" rel="stylesheet">
+
+    <!-- socket.io -->
+    <script src="socket.io.js"></script>
+
+    <!-- Tone.js -->
+    <script src="Tone.js"></script>
+
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>Austin's Cool Synth</h1>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <div style="margin: 20px 0px">
+                <div id="container-centered-item">
+                    <div>Octave Slider</div>
+                </div>
+                <div id="container-centered-item">
+                    <input type="range" min="1" value="2" max="6" id="octave-slider">
+                </div>
+            </div>
+            <div style="margin: 20px 0px">
+                <div id="container-centered-item">
+                    <div>Arpeggiator Volume</div>
+                </div>
+                <div id="container-centered-item">
+                    <input type="range" min="-10" value="1" max="10" id="looper-volume-slider">
+                </div>
+            </div>
+        </div>
+        <div id="container-centered-item">
+            <input type="button" value="Record" id="record-button" />
+            <input type="button" value="Preset: Stranger Things" onclick="establishChords('stranger things')" />
+            <input type="button" value="Preset: Basic Notes" onclick="establishChords('basic notes')"/>
+            <input type="button" value="Preset: Random Notes" onclick="establishChords('random')"/>
+            <input type="button" value="Preset: Jump (Van Halen)" onclick="establishChords('jump van halen')"/>
+            <input type="button" value="Preset: As It Was (Harry Styles)" onclick="establishChords('as it was')"/>
+        </div>
+        <div id="container-centered-item">
+            <div class="key" id="key-1">
+                1
+            </div>
+            <div class="key" id="key-2">
+                2
+            </div>
+            <div class="key" id="key-3">
+                3
+            </div>
+            <div class="key" id="key-4">
+                4
+            </div>
+            <div class="key" id="key-5">
+                5
+            </div>
+            <div class="key" id="key-6">
+                6
+            </div>
+            <div class="key" id="key-7">
+                7
+            </div>
+            <div class="key" id="key-8">
+                8
+            </div>
+            <div class="key" id="key-9">
+                9
+            </div>
+            <div class="key" id="key-10">
+                10
+            </div>
+        </div>
+        <div class="controls-box">
+            <!--  -->
+            <!-- LEFT SIDE CONTROLS -->
+            <!--  -->
+            <div id="container-sliders" style="float: left">
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Backboard (Chorus Frequency)
+                    </div>
+                    <input type="range" min="0" max="250" value="100" class="slider" id="chorus-slider">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Release Duration
+                    </div>
+                    <input type="range" min="0" max="15" value="5" step="0.1" class="slider" id="release-slider">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Pitch Shift Frequency
+                    </div>
+                    <input type="range" min="0" max="100" value="0" step="1" class="slider" id="pitch-shift-slider">
+                </div>
+            </div>
+            <!--  -->
+            <!-- RIGHT SIDE CONTROLS -->
+            <!--  -->
+            <div id="container-sliders" style="float: right">
+                <div class="selector-container">
+                    <div class="selector-label">
+                        Wave Type
+                    </div>
+                    <select id="wave-type-selector">
+                        <option value="sine">Sine</option>
+                        <option value="square">Square</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth" selected>Sawtooth</option>
+                    </select>
+                </div>
+                <div class="selector-container">
+                    <div class="selector-label">
+                        Retro
+                    </div>
+                    <input type="checkbox" id="retro-checkbox" checked>
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Delay Strength
+                    </div>
+                    <input type="range" min="0" max="1" value="0" step="0.01" class="slider" id="delay-slider">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // #####
+        // Server Code
+        // #####
+
+        // Socket.IO event handler
+        var socket = io.connect('http://localhost:2500');
+        socket.on('connect', function () {
+            console.log("Connected to Local Server");
+        });
+
+        // #####
+        // EFFECTS FOR SYNTHS
+        // #####
+        Tone.context.lookAhead = 0;
+
+        var hasClicked = false;
+        var synths, now, notes, octave;
+        var waveType = document.querySelector("#wave-type-selector").value; // sets default
+
+        function updateOscillatorTypes() {
+            // sine depth
+            if (synths == undefined) return;
+
+            waveType = document.querySelector("#wave-type-selector").value; // updates wave type
+
+            // retro mode            
+            if (document.querySelector("#retro-checkbox").checked) {
+                if (!waveType.includes("fat")) waveType = "fat" + waveType;
+            }
+            else {
+                if (waveType.includes("fat")) waveType = waveType.substring(3);
+            }
+
+            console.log(waveType);
+
+            // update all synths
+            for (let i = 0; i < synths.length; i++) {
+                synths[i].oscillator.type = waveType;
+            }
+        }
+
+        document.querySelector("#retro-checkbox").addEventListener("click", function() { updateOscillatorTypes() } );
+        document.querySelector("#wave-type-selector").addEventListener("change", function() { updateOscillatorTypes() } );
+
+        // #1: CHORUS
+        const chorus = new Tone.Chorus(16, 8, 4, 2, 1).toDestination().start();
+        const updateChorus = () => { chorus.frequency.value = document.querySelector("#chorus-slider").value }
+        document.querySelector("#chorus-slider").addEventListener("input", updateChorus, false);
+
+        // #2: RELEASE
+        const updateRelease = function() {
+            if (!synths) return;
+            const release = document.querySelector("#release-slider").value;
+            // adjust the release on all synths
+            for (let i = 0; i < synths.length; i++) {
+                synths[i].envelope.release = release;
+            }
+        }
+        document.querySelector("#release-slider").addEventListener("input", updateRelease, false);
+
+        // #5: PITCH SHIFT (GOOD FOR SWAPPING OCTAVES CLEANLY)
+        const pitchShift = new Tone.PitchShift(document.querySelector("#pitch-shift-slider").value).toDestination();
+        const updatePitchShift = () => { pitchShift.pitch = document.querySelector("#pitch-shift-slider").value }
+        document.querySelector("#pitch-shift-slider").addEventListener("input", updatePitchShift, false);
+
+        // DELAY
+        const delay = new Tone.FeedbackDelay(document.querySelector("#delay-slider").value, 0.5).toDestination();
+        const updateDelay = () => { delay.delayTime.value = document.querySelector("#delay-slider").value }
+        document.querySelector("#delay-slider").addEventListener("input", updateDelay, false);
+
+        // #####
+        // BUILDING SYNTHS
+        // #####
+
+        // #####
+        // SYNTH FOR ARPEGGIATOR
+        // #####
+        // create arppegiatorSynth, a direct clone of the first synth
+        const recordedNoteSpeed = "32n";
+        var arppegiatorSynth;
+
+        function buildSynths() {
+            // if any notes are currently playing, stop them
+            if (synths != undefined) {
+                for (let i = 0; i < synths.length; i++) {
+                    synths[i].triggerRelease();
+                }
+            }
+            console.log("STATE UPDATE: Building Synthesizers...");
+            synths = []
+
+            for (let i = 0; i <= 10; i++) {
+                const synth = new Tone.AMSynth(Tone.Synth, 2);
+
+                synth.set({
+                    "oscillator": {
+                        "type": waveType
+                    },
+                    "envelope": {
+                        "attack": 0.01,
+                        "decay": 0.5,
+                        "sustain": 0.5,
+                        "release": 0.5
+                    }
+                });
+
+                // #1: CHORUS
+                synth.connect(chorus);
+                // #2: PITCH SHIFT (GOOD FOR SWAPPING OCTAVES CLEANLY)
+                synth.connect(pitchShift);
+                // #3: DELAY
+                synth.connect(delay);
+
+                if (i == 10) {
+                    arppegiatorSynth = synth;
+                }
+
+                synths.push(synth);
+            }
+            updateOscillatorTypes();
+        }
+        // C E G B C+1 = stranger things
+        function establishChords(preset="basic notes") {
+            let octave = document.querySelector("#octave-slider").value;
+            // set random chords for all 10 keys
+            notes = [];
+            if (preset == "basic notes")
+            {
+                notes = ["C" + octave, "D" + octave, "E" + octave, "F" + octave, "G" + octave, "A" + octave, "B" + octave, "C" + (parseInt(octave) + 1), "D" + (parseInt(octave) + 1), "E" + (parseInt(octave) + 1)];
+            }
+            else if (preset == "stranger things")
+            {
+                notes = ["C" + octave, "E" + octave, "G" + octave, "B" + octave, "C" + (parseInt(octave) + 1)];
+            }
+            else if (preset == "random")
+            {
+                const usedNotes = []
+                for (let i = 0; i < 10; i++) {
+                    let note = Tone.Frequency(Tone.Frequency("C2").transpose(Math.floor(Math.random() * 24))).toNote();
+                    while (usedNotes.includes(note)) {
+                        note = Tone.Frequency(Tone.Frequency("C2").transpose(Math.floor(Math.random() * 24))).toNote();
+                    }
+                    usedNotes.push(note);
+                    notes.push(note);
+                }
+            }
+            else if (preset == "jump van halen")
+            {
+                notes = ["C3", "C4", "B4", "G4", "D5", "C5", "E5", "F4", 'A4', 'B4']
+            }
+            else if (preset == "as it was")
+            {
+                notes = ["A4", "B4", "C5", "E5"]
+            }
+
+            // for each div id'd `key-{number}`, set the text to the corresponding note
+            for (let i = 1; i <= 10; i++) {
+                noteKey = notes[i-1];
+                if (noteKey == undefined)
+                {
+                    noteKey = '-'
+                }
+                document.querySelector("#key-" + i).innerHTML = noteKey;
+            }
+        }
+
+        document.querySelector("#octave-slider").addEventListener("input", function () {
+            establishChords();
+        });
+
+        document.body.addEventListener("click", function () {
+            hasClicked = true;
+            console.log(Tone);
+
+            buildSynths();
+            establishChords();
+
+        }, { once: true });
+
+        class Note {
+            constructor(note, time, isPressed, timeFromLastNote) {
+                this.key = note; // note key played (ex. C4, B2, etc.)
+                this.time = time; // time at which played (in seconds)
+                this.isPressed = isPressed; // whether the note is pressed or released
+                this.timeFromLastNote = timeFromLastNote; // time from last recorded note (in seconds)
+            }
+
+            toString() {
+                return "\n" + this.key + " @ " + this.time + "\n(" + this.isPressed + ")\nDELAY: " + this.timeFromLastNote;
+            }
+        }
+
+        // #####
+        // RECORDING / PLAYBACK LOOP SYSTEM (ARPEGGIATOR)
+        // #####
+        var noteLooper;
+        var recording = false;
+        var recordingStartTime, recordingEndTime;
+        var recordedNotes = [];
+
+        // first, add an event listener to the record button
+        document.querySelector("#record-button").addEventListener("click", function () {
+            if (!recording) {
+                recording = true;
+                recordedNotes = [];
+                // clear the interval noteLooper, if it exists
+                if (noteLooper != undefined) {
+                    clearInterval(noteLooper);
+                }
+                document.querySelector("#record-button").value = "Stop Recording";
+                document.querySelector("#record-button").classList.add("recording");
+                console.log("STATE UPDATE: Recording...");
+                recordingStartTime = Tone.context.currentTime; // Tone.context.currentTime records the time from pageload IN SECONDS!!
+            } else {
+                recording = false;
+                document.querySelector("#record-button").value = "Record";
+                document.querySelector("#record-button").classList.remove("recording");
+                console.log("STATE UPDATE: Stopped Recording");
+
+                // if the recording is empty, don't do anything
+                if (recordedNotes.length == 0) return;
+
+                // calculate the length of the recording
+                recordingEndTime = recordedNotes[recordedNotes.length - 1].time + Tone.context.currentTime;
+                const recordingLength = recordingEndTime - recordingStartTime;
+                console.log("Recording Length: " + recordingLength);
+
+                // now, we need to loop the recording
+                console.log("STATE UPDATE: Playing Back Recording...");
+                
+                // Set an interval to forever loop the recording
+                function loopNotes(index) { // loop through the recorded notes
+                    
+                    const noteToPlay = recordedNotes[index]; // the note to play
+                    var noteTime = noteToPlay.time; // the time (in seconds) thaht the note is hit
+
+                    // if the note is pressed, play it
+                    if (noteToPlay.isPressed) {
+                        noteTime = recordedNotes[index + 1].time - noteToPlay.time;
+                        arppegiatorSynth.triggerAttackRelease(noteToPlay.key, noteTime);
+                    }
+
+                    let delay;
+                    // if we are at the end of the recording, reset the index
+                    if (index == recordedNotes.length - 1) {
+                        index = 0;
+
+                        let averageTime = 0;
+                        for (let i = 0; i < recordedNotes.length - 1; i++) {
+                            const thisNote = recordedNotes[i];
+                            if (thisNote.isPressed == false) continue;
+                            averageTime += thisNote.timeFromLastNote;
+                        }
+                        averageTime /= recordedNotes.length - 1;
+                        delay = averageTime * 1000 * 2;
+                        console.log(delay + " ms");
+                    }
+                    else {
+                        index++;
+                        delay = recordedNotes[index].timeFromLastNote * 1000;
+                    }
+
+                    noteLooper = setTimeout(loopNotes, delay, index);
+                }
+                loopNotes(0);
+            }
+        });
+        document.querySelector("#looper-volume-slider").addEventListener("input", function() { 
+            // adjust arpeggiator volume
+            if (arppegiatorSynth) {
+                arppegiatorSynth.volume.value = this.value;
+            } else {
+                console.log("Attempted change of arpeggiator volume, but arpeggiatorSynth is not initialized")
+            }
+        });
+
+        // #####
+        // BASIC PLAYING/RELEASING OF NOTES
+        // #####
+        function recordNote(key, isPressed) {
+                // if the list of notes is empty    
+                if (recordingStartTime == undefined) {
+                    // set the recording start time to now
+                    recordingStartTime = Tone.context.currentTime;
+                }
+                const time = Tone.context.currentTime - recordingStartTime;
+                var timeFromLastNote;
+                if (recordedNotes.length == 0) {
+                    timeFromLastNote = 0;
+                }
+                else {
+                    timeFromLastNote = time - recordedNotes[recordedNotes.length - 1].time;
+                }
+                const note = new Note(notes[key - 1], time, isPressed, timeFromLastNote);
+                recordedNotes.push(note);
+        }
+
+        function playNote(key) {
+            if (!hasClicked) {
+                console.log("No Page Interaction Yet");
+                return;
+            }
+
+            // key will be a number 1-5
+            const note = notes[key - 1];
+
+            synths[key - 1].triggerAttack(note, Tone.context.currentTime);
+
+            // if we are recording, add the note to the recordedNotes array
+            if (recording) {
+                recordNote(key, true);
+            }
+        }
+
+        function stopNote(key) {
+            if (!hasClicked) {
+                console.log("No Page Interaction Yet");
+                return;
+            }
+
+            // key will be a number 1-5
+            const note = notes[key - 1];
+
+            synths[key - 1].triggerRelease();
+
+            // if we are recording, add the note to the recordedNotes array (as a release)
+            if (recording) {
+                recordNote(key, false);
+            }
+        }
+
+        // On receive event "keyDown", play the note
+        socket.on('keyDown', function (data) {
+            const key = data.key;
+
+            // get the key element
+            const keyElement = document.querySelector(`#key-${key}`);
+            // add the pressed class
+            keyElement.classList.add("pressed");
+
+            playNote(data.key);
+
+            // console.log("Button Pressed: " + data.key);
+        });
+
+        // On receive event "keyUp", stop the note
+        socket.on('keyUp', function (data) {
+            const key = data.key;
+
+            // get the key element
+            const keyElement = document.querySelector(`#key-${key}`);
+            // remove the pressed class
+            keyElement.classList.remove("pressed");
+
+            stopNote(data.key);
+
+            // console.log("Button Released: " + data.key);
+        });
+
+        // On receive event "potentiometer", change the related value
+        socket.on('potentiometer', function (data) {
+            const potentiometer = data.potentiometer;
+            const value = data.value;
+
+            var sliderToAdjust;
+            switch (potentiometer) {
+                case 0:
+                    sliderToAdjust = document.querySelector("#release-slider");
+                    break;
+                case 1:
+                    sliderToAdjust = document.querySelector("#chorus-slider");
+                    break;
+                case 2:
+                    sliderToAdjust = document.querySelector("#delay-slider");
+                    break;
+                case 3:
+                    sliderToAdjust = document.querySelector("#pitch-shift-slider");
+                    break;
+            }
+
+            // normalize the value between the slider's min and max
+            const normalizedValue = (value / 1023) * (sliderToAdjust.max - sliderToAdjust.min) + sliderToAdjust.min;
+
+            sliderToAdjust.value = sliderToAdjust.max - normalizedValue;
+
+            if (potentiometer == 0) {
+                updateRelease();
+            }
+            else if (potentiometer == 1) {
+                updateChorus();
+            }
+            else if (potentiometer == 2) {
+                updateDelay();
+            }
+            else if (potentiometer == 3) {
+                updatePitchShift();
+            }
+        });
+    </script>
+
+    <style>
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* variables for a dark color scheme with deep blue accents */
+        :root {
+            --background-color: #1b1b1b;
+            --background-color-accent: #2b2b2b;
+            --text-color: #ffffff;
+            --accent-color: #0077b6;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .controls-box {
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        #container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #header {
+            font-size: 120%;
+            text-align: center;
+
+            box-sizing: content-box;
+            border-width: 1px;
+            border-style: solid;
+            /* gradient going from --background to --text to --background */
+            border-image: linear-gradient(to right, var(--background-color), var(--accent-color), var(--background-color)) 1;
+            border-image-slice: 1;
+
+            border-radius: 0px 0px 15px 15px;
+            margin-top: 160px;
+        }
+
+        .key {
+            margin: 10px;
+            border-top: 2px solid var(--accent-color);
+            background-color: var(--background-color-accent);
+            height: 150px;
+            width: 120px;
+            font-weight: 800;
+            font-size: 80px;
+            /* vertically and horizontally center text */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pressed {
+            background-color: var(--accent-color);
+            color: var(--background-color);
+        }
+
+        input[type=checkbox] {
+            /* make it big and chunky!! */
+            width: 30px;
+            height: 30px;
+        }
+
+        .selector-label {
+            font-size: 120%;
+        }
+
+        .selector-container {
+            /* display checkbox and checkbox label side by side */
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            padding: 10px;
+        }
+
+        /* now for the range sliders */
+        input[type=range] {
+            /* make it big and chunky!! */
+            width: 200px;
+            height: 30px;
+        }
+
+        .slider-label {
+            font-size: 120%;
+        }
+
+        .slider-container {
+            border-bottom: 1px dashed var(--accent-color);
+            padding: 5px;
+            width: 325px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        /* now for the dropdowns */
+        input[type=dropdown] {
+            /* colors */
+            background-color: var(--background-color-accent);
+            color: var(--text-color);
+        }
+
+        /* buttons! */
+        input[type=button] {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 5px;
+            margin: 5px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        input[type=button]:hover {
+            background-color: var(--accent-color);
+            color: var(--background-color);
+        }
+
+        #record-button {
+            border: 1px solid #ff1515;
+            color: white;
+            transition: 0.1s;
+        }
+
+        #record-button:hover {
+            background-color: #ff1515;
+            color: white;
+        }
+
+        .recording {
+            color: #ff1515 !important;
+            font-weight: bolder;
+        }
+
+        #container-centered-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</body>
+
+</html>
