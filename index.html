@@ -21,14 +21,7 @@
             <h1>Austin's Cool Synth</h1>
         </div>
         <div style="display: flex; justify-content: center; align-items: center;">
-            <div style="margin: 20px 0px">
-                <div id="container-centered-item">
-                    <div>Octave Slider</div>
-                </div>
-                <div id="container-centered-item">
-                    <input type="range" min="1" value="2" max="6" id="octave-slider">
-                </div>
-            </div>
+            <canvas id="waveform" height="310" width="310"></canvas>
             <div style="margin: 20px 0px">
                 <div id="container-centered-item">
                     <div>Arpeggiator Volume</div>
@@ -40,74 +33,54 @@
         </div>
         <div id="container-centered-item">
             <input type="button" value="Record" id="record-button" />
-            <input type="button" value="Preset: Stranger Things" onclick="establishChords('stranger things')" />
-            <input type="button" value="Preset: Basic Notes" onclick="establishChords('basic notes')"/>
-            <input type="button" value="Preset: Random Notes" onclick="establishChords('random')"/>
-            <input type="button" value="Preset: Jump (Van Halen)" onclick="establishChords('jump van halen')"/>
-            <input type="button" value="Preset: As It Was (Harry Styles)" onclick="establishChords('as it was')"/>
+            <input type="button" value="Preset: Stranger Things" onclick="changePreset('stranger things')" />
+            <input type="button" value="Preset: Basic Notes" onclick="changePreset('basic notes')" />
+            <input type="button" value="Preset: Random Notes" onclick="changePreset('random')" />
+            <input type="button" value="Preset: Cool Medley" onclick="changePreset('cool medley')" />
+            <input type="button" value="Preset: As It Was (Harry Styles)" onclick="changePreset('as it was')" />
         </div>
         <div id="container-centered-item">
-            <div class="key" id="key-1">
-                1
-            </div>
-            <div class="key" id="key-2">
-                2
-            </div>
-            <div class="key" id="key-3">
-                3
-            </div>
-            <div class="key" id="key-4">
-                4
-            </div>
-            <div class="key" id="key-5">
-                5
-            </div>
-            <div class="key" id="key-6">
-                6
-            </div>
-            <div class="key" id="key-7">
-                7
-            </div>
-            <div class="key" id="key-8">
-                8
-            </div>
-            <div class="key" id="key-9">
-                9
-            </div>
-            <div class="key" id="key-10">
-                10
-            </div>
+            <!-- 34 total keys -->
+            <div class="key" id="key-1">1</div>
+            <div class="key" id="key-2">2</div>
+            <div class="key" id="key-3">3</div>
+            <div class="key" id="key-4">4</div>
+            <div class="key" id="key-5">5</div>
+            <div class="key" id="key-6">6</div>
+            <div class="key" id="key-7">7</div>
+            <div class="key" id="key-8">8</div>
+            <div class="key" id="key-9">9</div>
+            <div class="key" id="key-10">10</div>
+            <div class="key" id="key-11">11</div>
+            <div class="key" id="key-12">12</div>
+            <div class="key" id="key-13">13</div>
+            <div class="key" id="key-14">14</div>
+            <div class="key" id="key-15">15</div>
+            <div class="key" id="key-16">16</div>
+            <div class="key" id="key-17">17</div>
+            <div class="key" id="key-18">18</div>
+            <div class="key" id="key-19">19</div>
+            <div class="key" id="key-20">20</div>
+            <div class="key" id="key-21">21</div>
+            <div class="key" id="key-22">22</div>
+            <div class="key" id="key-23">23</div>
+            <div class="key" id="key-24">24</div>
+            <div class="key" id="key-25">25</div>
+            <div class="key" id="key-26">26</div>
+            <div class="key" id="key-27">27</div>
+            <div class="key" id="key-28">28</div>
+            <div class="key" id="key-29">29</div>
+            <div class="key" id="key-30">30</div>
+            <div class="key" id="key-31">31</div>
+            <div class="key" id="key-32">32</div>
+            <div class="key" id="key-33">33</div>
+            <div class="key" id="key-34">34</div>
         </div>
         <div class="controls-box">
             <!--  -->
             <!-- LEFT SIDE CONTROLS -->
             <!--  -->
             <div id="container-sliders" style="float: left">
-                <div class="slider-container">
-                    <div class="slider-label">
-                        Backboard (Chorus Frequency)
-                    </div>
-                    <input type="range" min="0" max="250" value="100" class="slider" id="chorus-slider">
-                </div>
-
-                <div class="slider-container">
-                    <div class="slider-label">
-                        Release Duration
-                    </div>
-                    <input type="range" min="0" max="15" value="5" step="0.1" class="slider" id="release-slider">
-                </div>
-
-                <div class="slider-container">
-                    <div class="slider-label">
-                        Pitch Shift Frequency
-                    </div>
-                    <input type="range" min="0" max="100" value="0" step="1" class="slider" id="pitch-shift-slider">
-                </div>
-            </div>
-            <!--  -->
-            <!-- RIGHT SIDE CONTROLS -->
-            <!--  -->
-            <div id="container-sliders" style="float: right">
                 <div class="selector-container">
                     <div class="selector-label">
                         Wave Type
@@ -121,16 +94,62 @@
                 </div>
                 <div class="selector-container">
                     <div class="selector-label">
-                        Retro
+                        Stack and Detune
                     </div>
-                    <input type="checkbox" id="retro-checkbox" checked>
+                    <input type="checkbox" id="retro-checkbox">
                 </div>
 
                 <div class="slider-container">
                     <div class="slider-label">
-                        Delay Strength
+                        Octave Slider
                     </div>
-                    <input type="range" min="0" max="1" value="0" step="0.01" class="slider" id="delay-slider">
+                    <input type="range" min="1" value="2" max="6" id="octave-slider">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Release Duration
+                    </div>
+                    <input type="range" min="0" max="15" value="5" step="0.1" class="slider" id="release-slider">
+                </div>
+            </div>
+            <div id="container-sliders" style="float: left">
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Distortion
+                    </div>
+                    <input type="range" min="0" value="0" max="1" step="0.1" id="distortion-slider">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Reverb
+                    </div>
+                    <input type="range" min="0" value="0" max="5" step="0.1" id="reverb-slider">
+                </div>
+            </div>
+            <!--  -->
+            <!-- RIGHT SIDE CONTROLS -->
+            <!--  -->
+            <div id="container-sliders" style="float: right">
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Mod (LFO)
+                    </div>
+                    <input type="range" min="0" max="15" value="0" step="0.1" class="slider" id="lfo-slider">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Pitch
+                    </div>
+                    <input type="range" min="0" max="20" step="0.1" value="0" class="slider" id="pitch-shift-slider">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        Delay
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" value="0" class="slider" id="delay-slider">
                 </div>
             </div>
         </div>
@@ -174,38 +193,61 @@
 
             // update all synths
             for (let i = 0; i < synths.length; i++) {
+                if (!synths[i].oscillator) return;
                 synths[i].oscillator.type = waveType;
             }
         }
 
-        document.querySelector("#retro-checkbox").addEventListener("click", function() { updateOscillatorTypes() } );
-        document.querySelector("#wave-type-selector").addEventListener("change", function() { updateOscillatorTypes() } );
+        document.querySelector("#retro-checkbox").addEventListener("click", function () { updateOscillatorTypes() });
+        document.querySelector("#wave-type-selector").addEventListener("change", function () { updateOscillatorTypes() });
 
-        // #1: CHORUS
-        const chorus = new Tone.Chorus(16, 8, 4, 2, 1).toDestination().start();
-        const updateChorus = () => { chorus.frequency.value = document.querySelector("#chorus-slider").value }
-        document.querySelector("#chorus-slider").addEventListener("input", updateChorus, false);
+        // #1: autoFilter [LFO]
+        const autoFilter = new Tone.AutoFilter({
+            frequency: document.querySelector("#lfo-slider").value,
+            type: "sine",
+            depth: 1,
+            baseFrequency: 200,
+            octaves: 2.6,
+            filter: {
+                type: "lowpass",
+                rolloff: -12,
+                Q: 1
+            }
+        }).toDestination().start();
+        const updateFilter = () => { autoFilter.frequency.value = document.querySelector("#lfo-slider").value; }
+        document.querySelector("#lfo-slider").addEventListener("input", updateFilter, false);
 
-        // #2: RELEASE
-        const updateRelease = function() {
+        // #2: Delay
+        const delay = new Tone.FeedbackDelay(document.querySelector("#delay-slider").value, 0.5).toDestination();
+        const updateDelay = () => { delay.delayTime.value = document.querySelector("#delay-slider").value; }
+        document.querySelector("#delay-slider").addEventListener("input", updateDelay, false);
+
+        // #3: RELEASE
+        const updateRelease = function () {
             if (!synths) return;
             const release = document.querySelector("#release-slider").value;
             // adjust the release on all synths
             for (let i = 0; i < synths.length; i++) {
+                if (!synths[i].envelope) return;
                 synths[i].envelope.release = release;
             }
         }
         document.querySelector("#release-slider").addEventListener("input", updateRelease, false);
 
+        // #4: Distortion
+        const distortion = new Tone.Distortion(document.querySelector("#distortion-slider").value).toDestination();
+        const updateDistortion = () => { distortion.distortion = document.querySelector("#distortion-slider").value; }
+        document.querySelector("#distortion-slider").addEventListener("input", updateDistortion, false);
+
+        // #5: Reverb
+        const reverb = new Tone.Reverb(document.querySelector("#reverb-slider").value).toDestination();
+        const updateReverb = () => { reverb.decay = document.querySelector("#reverb-slider").value; }
+        document.querySelector("#reverb-slider").addEventListener("input", updateReverb, false);
+
         // #5: PITCH SHIFT (GOOD FOR SWAPPING OCTAVES CLEANLY)
         const pitchShift = new Tone.PitchShift(document.querySelector("#pitch-shift-slider").value).toDestination();
-        const updatePitchShift = () => { pitchShift.pitch = document.querySelector("#pitch-shift-slider").value }
+        const updatePitchShift = () => { pitchShift.pitch = document.querySelector("#pitch-shift-slider").value - (document.querySelector("#pitch-shift-slider").max / 2) }
         document.querySelector("#pitch-shift-slider").addEventListener("input", updatePitchShift, false);
-
-        // DELAY
-        const delay = new Tone.FeedbackDelay(document.querySelector("#delay-slider").value, 0.5).toDestination();
-        const updateDelay = () => { delay.delayTime.value = document.querySelector("#delay-slider").value }
-        document.querySelector("#delay-slider").addEventListener("input", updateDelay, false);
 
         // #####
         // BUILDING SYNTHS
@@ -217,6 +259,7 @@
         // create arppegiatorSynth, a direct clone of the first synth
         const recordedNoteSpeed = "32n";
         var arppegiatorSynth;
+        const numberOfKeys = 34;
 
         function buildSynths() {
             // if any notes are currently playing, stop them
@@ -228,29 +271,29 @@
             console.log("STATE UPDATE: Building Synthesizers...");
             synths = []
 
-            for (let i = 0; i <= 10; i++) {
-                const synth = new Tone.AMSynth(Tone.Synth, 2);
+            for (let i = 0; i <= numberOfKeys+1; i++) {
+                const synth = new Tone.Synth(2, Tone.Synth).toDestination();
 
-                synth.set({
-                    "oscillator": {
-                        "type": waveType
-                    },
-                    "envelope": {
-                        "attack": 0.01,
-                        "decay": 0.5,
-                        "sustain": 0.5,
-                        "release": 0.5
-                    }
-                });
+                // const synth = new Tone.Sampler({
+                //     urls: {
+                //         "C2": "C2.wav",
+                //     },
+                //     baseUrl: "instruments/cello/",
+                //     curve: "exponential"
+                // }).toDestination();
 
-                // #1: CHORUS
-                synth.connect(chorus);
+                // #1: filter
+                synth.connect(autoFilter);
                 // #2: PITCH SHIFT (GOOD FOR SWAPPING OCTAVES CLEANLY)
                 synth.connect(pitchShift);
-                // #3: DELAY
+                // #3: delay
                 synth.connect(delay);
+                // #4: distortion
+                synth.connect(distortion);
+                // #5: reverb
+                synth.connect(reverb);
 
-                if (i == 10) {
+                if (i == numberOfKeys+1) {
                     arppegiatorSynth = synth;
                 }
 
@@ -258,21 +301,86 @@
             }
             updateOscillatorTypes();
         }
-        // C E G B C+1 = stranger things
-        function establishChords(preset="basic notes") {
-            let octave = document.querySelector("#octave-slider").value;
-            // set random chords for all 10 keys
-            notes = [];
-            if (preset == "basic notes")
-            {
-                notes = ["C" + octave, "D" + octave, "E" + octave, "F" + octave, "G" + octave, "A" + octave, "B" + octave, "C" + (parseInt(octave) + 1), "D" + (parseInt(octave) + 1), "E" + (parseInt(octave) + 1)];
+
+        // render the waveform of synths[0] in #waveform canvas
+        var pressedSynths = []
+        const waveform = new Tone.Waveform(1024).toDestination();
+        function renderWaveform() {
+            if (!synths) return;
+            if (!pressedSynths[0]) s = synths[0];
+            else s = pressedSynths[0];
+            s.connect(waveform);
+            const canvas = document.querySelector("#waveform");
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const values = waveform.getValue();
+
+            // start a line
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.strokeStyle = "#0077b6";
+            
+            // for each value, move the line to that point
+            for (let i = 0; i < values.length; i++) {
+                const x = i;
+                const y = canvas.height - (values[i] * 250);
+                ctx.lineTo(x, y);
             }
-            else if (preset == "stranger things")
-            {
+            ctx.stroke();
+        }
+
+        // repeat the 'renderwaveform' function INFINITELY, every 10 ms
+        setInterval(renderWaveform, 10);
+
+        // C E G B C+1 = stranger things
+        var preset = "basic notes";
+
+        function establishChords() {
+            let octave = document.querySelector("#octave-slider").value;
+            // set random chords for all 18 keys
+            notes = [];
+            if (preset == "basic notes") {
+                notes = [
+                    "C" + octave,
+                    "C#" + octave,
+                    "D" + octave,
+                    "D#" + octave,
+                    "E" + octave,
+                    "F" + octave,
+                    "F#" + octave,
+                    "G" + octave,
+                    "G#" + octave,
+                    "A" + octave,
+                    "A#" + octave,
+                    "B" + octave,
+                    "C" + (parseInt(octave) + 1),
+                    "C#" + (parseInt(octave) + 1),
+                    "D" + (parseInt(octave) + 1),
+                    "D#" + (parseInt(octave) + 1),
+                    "E" + (parseInt(octave) + 1),
+                    "F" + (parseInt(octave) + 1),
+                    "F#" + (parseInt(octave) + 1),
+                    "G" + (parseInt(octave) + 1),
+                    "G#" + (parseInt(octave) + 1),
+                    "A" + (parseInt(octave) + 1),
+                    "A#" + (parseInt(octave) + 1),
+                    "B" + (parseInt(octave) + 1),
+                    "C" + (parseInt(octave) + 2),
+                    "C#" + (parseInt(octave) + 2),
+                    "D" + (parseInt(octave) + 2),
+                    "D#" + (parseInt(octave) + 2),
+                    "E" + (parseInt(octave) + 2),
+                    "F" + (parseInt(octave) + 2),
+                    "F#" + (parseInt(octave) + 2),
+                    "G" + (parseInt(octave) + 2),
+                    "G#" + (parseInt(octave) + 2),
+                    "A" + (parseInt(octave) + 2)
+                ];
+            }
+            else if (preset == "stranger things") {
                 notes = ["C" + octave, "E" + octave, "G" + octave, "B" + octave, "C" + (parseInt(octave) + 1)];
             }
-            else if (preset == "random")
-            {
+            else if (preset == "random") {
                 const usedNotes = []
                 for (let i = 0; i < 10; i++) {
                     let note = Tone.Frequency(Tone.Frequency("C2").transpose(Math.floor(Math.random() * 24))).toNote();
@@ -283,24 +391,26 @@
                     notes.push(note);
                 }
             }
-            else if (preset == "jump van halen")
-            {
-                notes = ["C3", "C4", "B4", "G4", "D5", "C5", "E5", "F4", 'A4', 'B4']
+            else if (preset == "cool medley") {
+                notes = ["C" + octave, "D" + octave, "E" + octave, "F" + octave, "G" + octave, "E" + (parseInt(octave) + 1), "F" + (parseInt(octave) + 1), "G" + (parseInt(octave) + 1), "A" + (parseInt(octave) + 1), "B" + (parseInt(octave) + 1)];
             }
-            else if (preset == "as it was")
-            {
+            else if (preset == "as it was") {
                 notes = ["A4", "B4", "C5", "E5"]
             }
 
             // for each div id'd `key-{number}`, set the text to the corresponding note
-            for (let i = 1; i <= 10; i++) {
-                noteKey = notes[i-1];
-                if (noteKey == undefined)
-                {
+            for (let i = 1; i <= numberOfKeys; i++) {
+                noteKey = notes[i - 1];
+                if (noteKey == undefined) {
                     noteKey = '-'
                 }
                 document.querySelector("#key-" + i).innerHTML = noteKey;
             }
+        }
+
+        const changePreset = function (p) {
+            preset = p;
+            establishChords();
         }
 
         document.querySelector("#octave-slider").addEventListener("input", function () {
@@ -366,10 +476,10 @@
 
                 // now, we need to loop the recording
                 console.log("STATE UPDATE: Playing Back Recording...");
-                
+
                 // Set an interval to forever loop the recording
                 function loopNotes(index) { // loop through the recorded notes
-                    
+
                     const noteToPlay = recordedNotes[index]; // the note to play
                     var noteTime = noteToPlay.time; // the time (in seconds) thaht the note is hit
 
@@ -404,7 +514,7 @@
                 loopNotes(0);
             }
         });
-        document.querySelector("#looper-volume-slider").addEventListener("input", function() { 
+        document.querySelector("#looper-volume-slider").addEventListener("input", function () {
             // adjust arpeggiator volume
             if (arppegiatorSynth) {
                 arppegiatorSynth.volume.value = this.value;
@@ -417,21 +527,21 @@
         // BASIC PLAYING/RELEASING OF NOTES
         // #####
         function recordNote(key, isPressed) {
-                // if the list of notes is empty    
-                if (recordingStartTime == undefined) {
-                    // set the recording start time to now
-                    recordingStartTime = Tone.context.currentTime;
-                }
-                const time = Tone.context.currentTime - recordingStartTime;
-                var timeFromLastNote;
-                if (recordedNotes.length == 0) {
-                    timeFromLastNote = 0;
-                }
-                else {
-                    timeFromLastNote = time - recordedNotes[recordedNotes.length - 1].time;
-                }
-                const note = new Note(notes[key - 1], time, isPressed, timeFromLastNote);
-                recordedNotes.push(note);
+            // if the list of notes is empty    
+            if (recordingStartTime == undefined) {
+                // set the recording start time to now
+                recordingStartTime = Tone.context.currentTime;
+            }
+            const time = Tone.context.currentTime - recordingStartTime;
+            var timeFromLastNote;
+            if (recordedNotes.length == 0) {
+                timeFromLastNote = 0;
+            }
+            else {
+                timeFromLastNote = time - recordedNotes[recordedNotes.length - 1].time;
+            }
+            const note = new Note(notes[key - 1], time, isPressed, timeFromLastNote);
+            recordedNotes.push(note);
         }
 
         function playNote(key) {
@@ -444,6 +554,7 @@
             const note = notes[key - 1];
 
             synths[key - 1].triggerAttack(note, Tone.context.currentTime);
+            pressedSynths.push(synths[key - 1]);
 
             // if we are recording, add the note to the recordedNotes array
             if (recording) {
@@ -461,6 +572,7 @@
             const note = notes[key - 1];
 
             synths[key - 1].triggerRelease();
+            pressedSynths.splice(pressedSynths.indexOf(synths[key - 1]), 1);
 
             // if we are recording, add the note to the recordedNotes array (as a release)
             if (recording) {
@@ -479,7 +591,7 @@
 
             playNote(data.key);
 
-            // console.log("Button Pressed: " + data.key);
+            console.log("Button Pressed: " + data.key);
         });
 
         // On receive event "keyUp", stop the note
@@ -504,16 +616,25 @@
             var sliderToAdjust;
             switch (potentiometer) {
                 case 0:
-                    sliderToAdjust = document.querySelector("#release-slider");
+                    sliderToAdjust = document.querySelector("#pitch-shift-slider");
                     break;
                 case 1:
-                    sliderToAdjust = document.querySelector("#chorus-slider");
+                    sliderToAdjust = document.querySelector("#lfo-slider");
                     break;
                 case 2:
                     sliderToAdjust = document.querySelector("#delay-slider");
                     break;
+                case 4:
+                    sliderToAdjust = document.querySelector("#release-slider");
+                    break;
+                case 5:
+                    sliderToAdjust = document.querySelector("#octave-slider");
+                    break;
                 case 3:
-                    sliderToAdjust = document.querySelector("#pitch-shift-slider");
+                    sliderToAdjust = document.querySelector("#reverb-slider");
+                    break;
+                case 6:
+                    sliderToAdjust = document.querySelector("#distortion-slider");
                     break;
             }
 
@@ -523,16 +644,25 @@
             sliderToAdjust.value = sliderToAdjust.max - normalizedValue;
 
             if (potentiometer == 0) {
-                updateRelease();
+                updatePitchShift();
             }
             else if (potentiometer == 1) {
-                updateChorus();
+                updateFilter();
             }
             else if (potentiometer == 2) {
                 updateDelay();
             }
+            else if (potentiometer == 4) {
+                updateRelease();
+            }
+            else if (potentiometer == 5) {
+                establishChords();
+            }
             else if (potentiometer == 3) {
-                updatePitchShift();
+                updateReverb();
+            }
+            else if (potentiometer == 6) {
+                updateDistortion();
             }
         });
     </script>
@@ -562,13 +692,6 @@
             margin-top: 20px;
         }
 
-        #container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
         #header {
             font-size: 120%;
             text-align: center;
@@ -581,17 +704,15 @@
             border-image-slice: 1;
 
             border-radius: 0px 0px 15px 15px;
-            margin-top: 160px;
         }
 
         .key {
-            margin: 10px;
             border-top: 2px solid var(--accent-color);
             background-color: var(--background-color-accent);
-            height: 150px;
-            width: 120px;
+            height: 200px;
+            width: 50px;
             font-weight: 800;
-            font-size: 80px;
+            font-size: 24px;
             /* vertically and horizontally center text */
             display: flex;
             align-items: center;
@@ -684,6 +805,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        #waveform {
+            background-color: var(--background-color);
         }
     </style>
 </body>

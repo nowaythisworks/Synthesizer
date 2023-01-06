@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "easymidi": "^3.0.1",
     "express": "^4.18.2",
     "johnny-five": "^2.1.0",
     "socket.io": "^4.5.4",
